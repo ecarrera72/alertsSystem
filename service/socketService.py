@@ -1,0 +1,2 @@
+class socketService(object):
+    pass
