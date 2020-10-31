@@ -19,11 +19,13 @@ class mysqldb(style):
             if not db['connect'].is_connected(): db['connect'].reconnect(attempts=3, delay=2)
 
             cur = db['connect'].cursor(dictionary=True)
-            data = None
             cur.execute(query)
 
-            if query.upper().startswith('SELECT'): data = cur.fetchall()
-            else: db['connect'].commit()
+            if query.upper().startswith('SELECT'):
+                data = cur.fetchall()
+            else:
+                db['connect'].commit()
+                data = cur.lastrowid
 
             cur.close()
             return data
