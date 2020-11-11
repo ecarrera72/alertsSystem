@@ -24,10 +24,10 @@ class models(object):
         obj['instance'] = self.objMysql
         return obj
 
-    def sqliteDataBase(self):
-        query = "SELECT * FROM configDB"
+    def sqliteData(self, database):
+        query = "SELECT * FROM {}".format(database)
         return { a[0] : a[1] for a in self.objSqlite.runQuery(query) }
 
-    def sqliteSystem(self):
-        query = "SELECT * FROM configSYS"
-        return { a[0] : a[1] for a in self.objSqlite.runQuery(query) }
+    # def sqliteSystem(self):
+    #     query = "SELECT * FROM configSYS"
+    #     return { a[0] : a[1] for a in self.objSqlite.runQuery(query) }
