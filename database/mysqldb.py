@@ -1,24 +1,23 @@
 from style.style import style
-from time import *
-#import MySQLdb
+from time import sleep
 import mysql.connector as my
-import os
+import os, logging
 
 class mysqldb(style):
 
     def connect(self, data):
         try:
-            #connect = my.connect(host=data['host'], port=int(data['port']), user=data['user'], passwd=data['passwd'], db=data['db'])
             connect = my.connect(**data)
-            return { 'connect':connect, 'dataConnect':data }
+            return { 'connect': connect }
         except Exception as e:
-            self.errorMysql(e)
+            self.errorMysql(e, None)
 
     def runQuery(self, query, db):
         try:
             if not db['connect'].is_connected(): db['connect'].reconnect(attempts=3, delay=2)
 
             cur = db['connect'].cursor(dictionary=True)
+            data = None
             cur.execute(query)
 
             if query.upper().startswith('SELECT'):
@@ -30,29 +29,29 @@ class mysqldb(style):
             cur.close()
             return data
         except my.Error as e:
-            self.errorMysql(e)
+            self.errorMysql(e, db)
         except Exception as e:
             print(self.red(e))
+            logging.error(e)
             return False
-    
-    def reconnect(self, data):
-        self.closeConnection(data)
-        print(self.blue("Start reconnect"))
-        return self.connect(data['dataConnect'])
     
     def closeConnection(self, data):
         print(self.purple("Close connection"))
-        if data['cursor'] is not None:
-            data['cursor'].close()
-            data['cursor'] = None
+        if data['connect'] is not None: data['connect'].close()
 
-        if data['connect'] is not None:
-            data['connect'].close()
-            data['connect'] = None
-
-    def errorMysql(self, error):
-        print('Error code:', error.errno)
-        print('Sql state:', error.sqlstate)
+    def errorMysql(self, error, db):
+        print(self.red('Error code: {}'.format(error.errno)))
         if error.errno == 2003:
-            print('Message:', error.msg)
+            print(self.red("Error: No se pudo conectar con el Servidor"))
+        
+        else:
+            print(self.red('Message: {}'.format(error.msg)))
+
+        if db is not None: 
+            self.closeConnection(db)
+            print("Is Connected {}".format(db['connect'].is_connected()))
+
+        logging.error(error)
+
+        sleep(3)
         os._exit(0)

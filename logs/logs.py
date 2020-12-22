@@ -1,2 +1,0 @@
-class logs(object):
-    pass
